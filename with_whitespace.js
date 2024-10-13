@@ -21,7 +21,7 @@
 					applyToAll ||
 					repos
 						.filter((repo) => repo.enabled)
-						.filter((repo) => repo.url.match(/.*\/.*/))
+						.filter((repo) => repo.url.match(/.+\/.+/))
 						.some((repo) => ownerRepo.match(new RegExp(repo.url)))
 				) {
 					url.searchParams.append("w", "1");

@@ -1,131 +1,136 @@
 document.addEventListener("DOMContentLoaded", () => {
 	const repoListElement = document.querySelector("#repo-list tbody");
 	const addRepoButton = document.getElementById("add-repo");
+	const enableAllCheckbox = document.getElementById("enable-all");
 
-	// Set constants
-	const DEFAULT_REPO = { url: "", enabled: true };
-
-	// Load repository list from chrome.storage
+	// Load the repository list and apply "enable-all" setting
 	const loadRepositories = () => {
-		chrome.storage.local.get("repositories", (data) => {
-			const repositories = data.repositories || [];
-			renderRepositories(repositories);
-		});
+		chrome.storage.local.get(
+			["repositories", "applyToAll"],
+			({ repositories = [], applyToAll = false }) => {
+				repoListElement.innerHTML = "";
+
+				// Set the state of the enable-all checkbox
+				enableAllCheckbox.checked = applyToAll;
+
+				// Sort repositories alphabetically by URL
+				repositories.sort((a, b) => a.url.localeCompare(b.url));
+
+				// Create table entries for each repository
+				repositories.forEach((repoObj, index) => {
+					createRepoEntry(repoObj, index, applyToAll);
+				});
+			},
+		);
 	};
 
-	// Display repositories
-	const renderRepositories = (repositories) => {
-		repoListElement.innerHTML = ""; // Clear existing rows
-		repositories.forEach((repoObj, index) => createRepoEntry(repoObj, index));
-	};
-
-	// Create repository entry
-	const createRepoEntry = (repoObj, index) => {
+	// Create a single row for a repository entry
+	const createRepoEntry = (repoObj, index, applyToAll) => {
 		const row = document.createElement("tr");
-		if (!repoObj.enabled) row.classList.add("inactive");
 
-		const urlCell = createUrlCell(repoObj.url, index);
-		const stateCell = createStateCell(repoObj.enabled, index);
-		const deleteCell = createDeleteCell(index);
+		// Apply opacity only if "enable-all" is checked
+		if (applyToAll) {
+			row.classList.add("inactive");
+		} else if (!repoObj.enabled) {
+			row.classList.add("inactive");
+		}
 
-		row.append(urlCell, stateCell, deleteCell);
+		// Repository URL cell
+		const urlCell = createRepoURLCell(repoObj, index);
+		row.appendChild(urlCell);
+
+		// State button cell
+		const stateCell = createStateButtonCell(repoObj, index);
+		row.appendChild(stateCell);
+
+		// Delete button cell
+		const deleteCell = createDeleteButtonCell(index);
+		row.appendChild(deleteCell);
+
 		repoListElement.appendChild(row);
 	};
 
-	// Create URL input cell
-	const createUrlCell = (url, index) => {
+	// Create repository URL input field
+	const createRepoURLCell = (repoObj, index) => {
 		const urlCell = document.createElement("td");
 		const urlInput = document.createElement("input");
-
 		urlInput.type = "text";
-		urlInput.value = url;
+		urlInput.value = repoObj.url;
 		urlInput.placeholder = "owner/repo or owner/*";
-
-		urlInput.addEventListener("change", () => {
-			updateRepo(index, urlInput.value);
-		});
-
+		urlInput.addEventListener("change", () =>
+			updateRepo(index, urlInput.value),
+		);
 		urlCell.appendChild(urlInput);
 		return urlCell;
 	};
 
-	// Create status cell
-	const createStateCell = (enabled, index) => {
+	// Create state toggle button
+	const createStateButtonCell = (repoObj, index) => {
 		const stateCell = document.createElement("td");
 		const stateButton = document.createElement("button");
-
-		stateButton.textContent = enabled ? "ACTIVE" : "INACTIVE";
-		stateButton.className = enabled ? "active-button" : "inactive-button";
-
-		stateButton.addEventListener("click", () => {
-			toggleState(index);
-		});
-
+		stateButton.textContent = repoObj.enabled ? "ACTIVE" : "INACTIVE";
+		stateButton.className = repoObj.enabled
+			? "active-button"
+			: "inactive-button";
+		stateButton.addEventListener("click", () => toggleState(index));
 		stateCell.appendChild(stateButton);
 		return stateCell;
 	};
 
 	// Create delete button
-	const createDeleteCell = (index) => {
+	const createDeleteButtonCell = (index) => {
 		const deleteCell = document.createElement("td");
 		const deleteButton = document.createElement("button");
-
 		deleteButton.className = "delete-button";
 		deleteButton.textContent = "X";
-
-		deleteButton.addEventListener("click", () => {
-			deleteRepository(index);
-		});
-
+		deleteButton.addEventListener("click", () => deleteRepository(index));
 		deleteCell.appendChild(deleteButton);
 		return deleteCell;
 	};
 
-	// Toggle repository state
+	// Toggle the state of a repository
 	const toggleState = (index) => {
-		chrome.storage.local.get("repositories", (data) => {
-			const repositories = data.repositories || [];
+		chrome.storage.local.get("repositories", ({ repositories = [] }) => {
 			const repo = repositories[index];
-			repo.enabled = !repo.enabled; // Toggle state
+			repo.enabled = !repo.enabled; // Toggle enabled state
 			chrome.storage.local.set({ repositories }, loadRepositories); // Save and reload
 		});
 	};
 
-	// Delete repository
+	// Delete a repository
 	const deleteRepository = (index) => {
-		chrome.storage.local.get("repositories", (data) => {
-			const repositories = data.repositories || [];
-			repositories.splice(index, 1); // Delete repository at specified index
+		chrome.storage.local.get("repositories", ({ repositories = [] }) => {
+			repositories.splice(index, 1); // Remove the repository at the given index
 			chrome.storage.local.set({ repositories }, loadRepositories); // Save and reload
 		});
 	};
 
-	// Update repository URL
+	// Update the repository URL
 	const updateRepo = (index, newUrl) => {
-		chrome.storage.local.get("repositories", (data) => {
-			const repositories = data.repositories || [];
+		chrome.storage.local.get("repositories", ({ repositories = [] }) => {
 			const repo = repositories[index];
-			if (repo) {
-				repo.url = newUrl; // Update repository URL
-				repositories.sort((a, b) => a.url.localeCompare(b.url));
-				chrome.storage.local.set({ repositories }, loadRepositories); // Save and reload
-			}
+			repo.url = newUrl; // Update the repository URL
+			chrome.storage.local.set({ repositories }, loadRepositories); // Save and reload
 		});
 	};
 
-	// Add empty repository entry
+	// Add a new empty repository entry if there is no blank one
 	addRepoButton.addEventListener("click", () => {
-		chrome.storage.local.get("repositories", (data) => {
-			const repositories = data.repositories || [];
+		chrome.storage.local.get("repositories", ({ repositories = [] }) => {
 			const hasBlankField = repositories.some((repoObj) => repoObj.url === "");
-
 			if (!hasBlankField) {
-				repositories.unshift(DEFAULT_REPO); // Add empty repository
+				repositories.push({ url: "", enabled: true });
 				chrome.storage.local.set({ repositories }, loadRepositories); // Save and reload
 			}
 		});
 	});
 
-	// Load initial repositories
+	// Apply "enable-all" state
+	enableAllCheckbox.addEventListener("change", (event) => {
+		const applyToAll = event.target.checked;
+		chrome.storage.local.set({ applyToAll }, loadRepositories); // Save and reload
+	});
+
+	// Initial load of repositories
 	loadRepositories();
 });
