@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hide Whitespace on Github PR Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    .inactive {
+      opacity: 0.5;
+    }
+
+    .active-button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 30px;
+      cursor: pointer;
+    }
+
+    .inactive-button {
+      background-color: #f44336;
+      color: rgb(105, 94, 94);
+      border: none;
+      padding: 10px 30px;
+      cursor: not-allowed;
+    }
+
+    .delete-button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 10px 50px;
+      cursor: pointer;
+    }
+
+    #repo-list {
+      width: 800px;
+      max-width: 100%;
+    }
+
+    #repo-list th,
+    #repo-list td {
+      text-align: center;
+    }
+
+    #repo-list input {
+      width: 100%;
+      max-width: 50ch;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Enter repository names to hide whitespace on Pull Requests</h1>
+
+  <div class="top-controls">
+    <button id="add-repo">Add Repository</button>
+  </div>
+
+  <table id="repo-list">
+    <thead>
+      <tr>
+        <th>Repository(owner/repo)</th>
+        <th>State</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="options.js"></script>
+</body>
+
+</html>
