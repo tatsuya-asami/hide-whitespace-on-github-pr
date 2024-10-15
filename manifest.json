@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hide Whitespace on Github PR",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Automatically hides whitespace changes in GitHub pull requests for specified repositories.",
   "host_permissions": [
     "https://github.com/"
@@ -18,5 +18,11 @@
   },
   "permissions": [
     "storage"
-  ]
+  ],
+  "icons": {
+    "16": "icon/16.png",
+    "48": "icon/48.png",
+    "128": "icon/128.png"
+  },
+  "author": "u2"
 }
