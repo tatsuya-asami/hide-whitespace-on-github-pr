@@ -27,5 +27,14 @@
     "48": "icon/48.png",
     "128": "icon/128.png"
   },
+  "action": {
+    "default_title": "Hide Whitespace",
+    "default_popup": "",
+    "default_icon": {
+      "16": "icon/16_default.png",
+      "48": "icon/48.png",
+      "128": "icon/128.png"
+    }
+  },
   "author": "u2"
 }
