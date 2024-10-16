@@ -25,6 +25,7 @@
 						.some((repo) => ownerRepo.match(new RegExp(repo.url)))
 				) {
 					url.searchParams.append("w", "1");
+					history.replaceState(null, "", url.toString());
 					window.location.href = url.toString();
 				}
 			});
