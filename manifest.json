@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["with_whitespace.js"]
+      "js": ["with_whitespace.js", "with_recently_updated.js"],
     }
   ],
   "options_ui": {
